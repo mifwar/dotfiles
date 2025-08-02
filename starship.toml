@@ -1,1 +1,169 @@
-/Users/eros/.config/starship.toml
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Inserts a blank line between shell prompts
+add_newline = true
+
+# Custom format to move language info and time to the right
+format = """
+$all\
+$fill\
+$memory_usage\
+$nodejs\
+$rust\
+$c\
+$cmake\
+$golang\
+$python\
+$time\
+$line_break\
+$character"""
+
+[character]
+success_symbol = "[└ \\$](bold green)"
+error_symbol = "[└ \\$](red)"
+
+# Disable the package module, hiding it from the prompt completely
+[package]
+disabled = true
+
+# [cmd_duration]
+# min_time = 500
+# format = "underwent [$duration](bold yellow)"
+
+[directory]
+truncation_length = 5
+format = " [ ](blue)[$path]($style)[$read_only]($read_only_style) "
+style = "blue"
+
+[git_branch]
+truncation_length = 4
+truncation_symbol = ""
+format = "[$symbol$branch]($style) "
+symbol = " "
+style = "bold  green"
+
+[git_commit]
+commit_hash_length = 4
+tag_symbol = " "
+
+[git_state]
+format = '(\($state( $progress_current of $progress_total)\)) '
+cherry_pick = " PICKING"
+
+[git_status]
+conflicted = "☢️"
+ahead = "⇡"
+behind = "⇣"
+diverged = "⇕"
+up_to_date = "󰸩 "
+untracked = "󱀶 "
+stashed = " "
+modified = " "
+renamed = "󱇧 "
+deleted = "󱀷 "
+staged = '󰝒 ($count) '
+format = '([ $all_status$ahead_behind]($style) )'
+style = "bold yellow"
+
+[c]
+symbol = " "
+format = "[$symbol($version )]($style)"
+
+[cmake]
+symbol = " "
+format = "[$symbol($version )]($style)"
+
+[golang]
+symbol = " "
+format = "[$symbol($version )]($style)"
+
+[hostname]
+ssh_only = false
+format = "[](bold green)[$hostname]($style)"
+style = "bold green"
+disabled = false
+trim_at = ".companyname.com"
+
+[nodejs]
+symbol = " "
+format = "[$symbol($version )]($style)"
+style = "bold green"
+
+[python]
+symbol = " "
+format = "via [$symbol($version )]($style)"
+pyenv_version_name = true
+
+[rust]
+symbol = "󱘗 "
+format = "via [$symbol($version )]($style)"
+
+[time]
+disabled = false
+format = '[⏲ $time](bold yellow)'
+time_format = "%T"
+utc_time_offset = "+7"
+
+[username]
+format = "[┌  ](bold green)[$user]($style)"
+disabled = false
+show_always = true
+style_user = "bold green"
+
+[memory_usage]
+disabled = false
+threshold = 80
+symbol = ' '
+style = 'bold red'
+format = '[$symbol$ram_pct]($style) '
+
+# [status]
+# style = 'bold red'
+# symbol = '✘ '
+# success_symbol = '✓ '
+# format = '[$symbol$common_meaning$signal_name$maybe_int]($style) '
+# map_symbol = true
+# disabled = false
+
+[aws]
+symbol = "󰸏 "
+
+[docker_context]
+symbol = "󰡨 "
+
+[elixir]
+symbol = " "
+
+[elm]
+symbol = " "
+
+[java]
+symbol = " "
+
+[julia]
+symbol = " "
+
+[kotlin]
+symbol = "󱈙 "
+
+[lua]
+symbol = " "
+
+[nix_shell]
+symbol = " "
+
+[php]
+symbol = " "
+
+[ruby]
+symbol = " "
+
+[scala]
+symbol = " "
+
+[swift]
+symbol = "󰛥 "
+
+[fill]
+symbol = " "

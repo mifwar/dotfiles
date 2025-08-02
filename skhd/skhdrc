@@ -1,0 +1,147 @@
+
+# -- Changing Window Focus --
+
+# change window focus within space
+shift + ctrl - j : yabai -m window --focus south
+shift + ctrl - k : yabai -m window --focus north
+shift + ctrl - h : yabai -m window --focus west
+shift + ctrl - l : yabai -m window --focus east
+
+#change focus between external displays (left and right)
+alt - u: yabai -m display --focus north 
+alt - n: yabai -m display --focus south 
+
+# Resize windows
+# -- Modifying the Layout --
+shift + alt + cmd - h : yabai -m window --resize left:-20:0
+shift + alt + cmd - l : yabai -m window --resize right:20:0
+shift + alt + cmd - j : yabai -m window --resize bottom:0:20
+shift + alt + cmd - k : yabai -m window --resize top:0:-20
+
+# Resize windows faster
+cmd + alt - h : yabai -m window --resize left:-100:0
+cmd + alt - l : yabai -m window --resize right:100:0
+cmd + alt - j : yabai -m window --resize bottom:0:100
+cmd + alt - k : yabai -m window --resize top:0:-100
+
+# rotate layout clockwise
+shift + alt - r : yabai -m space --rotate 270
+
+# flip along y-axis
+shift + alt - y : yabai -m space --mirror y-axis
+
+# flip along x-axis
+shift + alt - x : yabai -m space --mirror x-axis
+
+# toggle window float
+# grid: <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
+shift + ctrl - t : yabai -m window --toggle float --grid 12:12:2:2:8:8
+shift + alt - t  : yabai -m window --toggle float --grid 12:12:1:1:10:10
+
+# Small PiP window in bottom-right corner (always on top)
+shift + alt - p : yabai -m window --toggle float --grid 12:12:9:9:3:2 --layer above
+
+
+# move toggled window
+shift + alt - h : yabai -m window --move rel:-20:0
+shift + alt - l : yabai -m window --move rel:20:0
+shift + alt - k : yabai -m window --move rel:0:-20
+shift + alt - j : yabai -m window --move rel:0:20
+
+# -- Modifying Window Size --
+
+# maximize a window
+shift + alt - m : yabai -m window --toggle zoom-fullscreen
+
+# balance out tree of windows (resize to occupy same area)
+shift + alt - e : yabai -m space --balance
+
+# -- Moving Windows Around --
+
+# swap windows
+ctrl + alt + cmd - j : yabai -m window --swap south
+ctrl + alt + cmd - k : yabai -m window --swap north
+ctrl + alt + cmd - h : yabai -m window --swap west
+ctrl + alt + cmd - l : yabai -m window --swap east
+#
+# Move window to the north display (assuming the second display is above the first)
+ctrl + alt + cmd - u : yabai -m window --display north; yabai -m display --focus north
+
+# Move window to the south display (assuming the second display is below the first)
+ctrl + alt + cmd - n : yabai -m window --display south; yabai -m display --focus south
+
+# Quick layouts
+shift + alt - 1 : yabai -m space --layout bsp     # Binary space partitioning
+shift + alt - 2 : yabai -m space --layout stack   # Stack layout
+shift + alt - 3 : yabai -m space --layout float   # Floating layout
+
+shift + alt - 0 : yabai -m space --balance
+
+# Toggle native fullscreen
+shift + alt - f : yabai -m window --toggle native-fullscreen
+
+ctrl + alt - s : yabai --stop-service
+ctrl + alt - r : yabai --start-service
+ctrl + alt - e : yabai --restart-service
+
+# cliclick
+alt - 7 : cliclick "m:-20,+0" #left (faster)
+alt - 8 : cliclick "m:+0,+20" #down (faster)
+alt - 9 : cliclick "m:+0,-20" #up (faster)
+alt - 0 : cliclick "m:+20,+0" #right (faster)
+
+shift + alt - 7 : cliclick "m:-100,+0" #left (faster)
+shift + alt - 8 : cliclick "m:+0,+100" #down (faster)
+shift + alt - 0 : cliclick "m:+100,+0" #right (faster)
+shift + alt - 9 : cliclick "m:+0,-100" #up (faster)
+
+alt - y : cliclick c:. #click
+alt - d : cliclick dc:. #double click
+alt - p : cliclick rc:.  #right click
+
+# move window and split
+# ctrl + alt - j : yabai -m window --warp south
+# ctrl + alt - k : yabai -m window --warp north
+# ctrl + alt - h : yabai -m window --warp west
+# ctrl + alt - l : yabai -m window --warp east
+
+# move window to display top and bottom
+# shift + alt - u : yabai -m window --display west; yabai -m display --focus north;
+# shift + alt - n : yabai -m window --display east; yabai -m display --focus south;
+
+
+# move window to prev and next space
+# shift + alt - p : yabai -m window --space prev;
+# shift + alt - n : yabai -m window --space next;
+
+# Move focused window to the next display
+# shift + ctrl + alt - up : \
+#     yabai -m window --display next || \
+#     yabai -m window --display north 
+
+# Move focused window to the previous display
+# shift + ctrl + alt - down : \
+#     yabai -m window --display prev || \
+#     yabai -m window --display south 
+
+# -- Starting/Stopping/Restarting Yabai --
+
+# stop/start/restart yabai
+# ctrl + alt - q : yabai --start-service
+
+
+# ctrl - 0x21 : cliclick c:.
+# cmd + shift + enter : cliclick rc:.
+#
+# DESKTOP
+#
+# Move current window to desktop 2
+ctrl + alt - 2 : yabai -m window --move desktop 2
+
+# Move current window to desktop 3
+ctrl + alt - 3 : yabai -m window --move desktop 3
+# alt + shift - 3 : yabai -m window --move desktop 3
+#
+# # Switch to desktop
+# alt + 2 : yabai -m space --focus 2
+# alt + 3 : yabai -m space --focus 3
