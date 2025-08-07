@@ -95,3 +95,11 @@ keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<cr>", { desc = "Find str
 keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
 
 keymap.set("i", "<CR>", "<CR>", { noremap = true, desc = "Normal enter behavior" })
+
+-- Wrap selected text
+keymap.set("v", '<leader>w"', 'c"<C-r>""<ESC>', { desc = "Wrap selection with double quotes" })
+keymap.set("v", "<leader>w'", "c'<C-r>\"'<ESC>", { desc = "Wrap selection with single quotes" })
+keymap.set("v", "<leader>w(", "c(<C-r>\")<ESC>", { desc = "Wrap selection with parentheses" })
+keymap.set("v", "<leader>w[", "c[<C-r>\"]<ESC>", { desc = "Wrap selection with brackets" })
+keymap.set("v", "<leader>w{", "c{<C-r>\"}<ESC>", { desc = "Wrap selection with braces" })
+keymap.set("v", "<leader>w`", "c`<C-r>\"`<ESC>", { desc = "Wrap selection with backticks" })
