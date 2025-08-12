@@ -83,8 +83,14 @@ keymap.set("n", "<leader>jq", "<cmd>%!jq '.'<CR>", { desc = "Run jq filter" })
 
 -- yank relative file path to clipboard
 keymap.set("n", "<leader>yp", function()
-  local filepath = vim.fn.expand('%')
-  vim.fn.setreg('+', filepath)
+  local filepath = vim.fn.expand("%")
+
+  -- if path contains "src/" but doesn't start with it, remove everything before "src/"
+  if filepath:find("src/") and not filepath:match("^src/") then
+    filepath = filepath:match("src/.*")
+  end
+
+  vim.fn.setreg("+", filepath)
   print("Yanked relative path: " .. filepath)
 end, { desc = "Yank relative file path to clipboard" })
 
@@ -99,7 +105,7 @@ keymap.set("i", "<CR>", "<CR>", { noremap = true, desc = "Normal enter behavior"
 -- Wrap selected text
 keymap.set("v", '<leader>w"', 'c"<C-r>""<ESC>', { desc = "Wrap selection with double quotes" })
 keymap.set("v", "<leader>w'", "c'<C-r>\"'<ESC>", { desc = "Wrap selection with single quotes" })
-keymap.set("v", "<leader>w(", "c(<C-r>\")<ESC>", { desc = "Wrap selection with parentheses" })
-keymap.set("v", "<leader>w[", "c[<C-r>\"]<ESC>", { desc = "Wrap selection with brackets" })
-keymap.set("v", "<leader>w{", "c{<C-r>\"}<ESC>", { desc = "Wrap selection with braces" })
-keymap.set("v", "<leader>w`", "c`<C-r>\"`<ESC>", { desc = "Wrap selection with backticks" })
+keymap.set("v", "<leader>w(", 'c(<C-r>")<ESC>', { desc = "Wrap selection with parentheses" })
+keymap.set("v", "<leader>w[", 'c[<C-r>"]<ESC>', { desc = "Wrap selection with brackets" })
+keymap.set("v", "<leader>w{", 'c{<C-r>"}<ESC>', { desc = "Wrap selection with braces" })
+keymap.set("v", "<leader>w`", 'c`<C-r>"`<ESC>', { desc = "Wrap selection with backticks" })
