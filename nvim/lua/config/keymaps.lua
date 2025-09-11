@@ -23,34 +23,6 @@ local function save_as()
     end
   end)
 end
-
--- Function to toggle between horizontal and vertical splits
-local function toggle_split_layout()
-  local win_count = vim.fn.winnr('$')
-  if win_count < 2 then
-    print("No splits to toggle")
-    return
-  end
-  
-  -- Get window dimensions to detect layout
-  local current_win = vim.fn.winnr()
-  local win_width = vim.fn.winwidth(current_win)
-  local win_height = vim.fn.winheight(current_win)
-  local total_width = vim.o.columns
-  local total_height = vim.o.lines
-  
-  -- If window width is close to total width, it's horizontal layout (top/bottom)
-  -- If window height is close to total height, it's vertical layout (left/right)
-  local is_horizontal = (win_width / total_width) > 0.8
-  
-  if is_horizontal then
-    -- Currently horizontal layout (top/bottom), convert to vertical (left/right)
-    vim.cmd('wincmd H') -- move current window to left (full height)
-  else
-    -- Currently vertical layout (left/right), convert to horizontal (top/bottom)
-    vim.cmd('wincmd J') -- move current window to bottom (full width)
-  end
-end
 -- General Keymaps
 
 -- exit insert mode
@@ -83,7 +55,6 @@ keymap.set("n", "<leader>wk", "5<C-w>-", { desc = "Decrease the current split wi
 keymap.set("n", "<leader>wh", "5<C-w><", { desc = "Increase the current split window's width." })
 keymap.set("n", "<leader>wl", "5<C-w>>", { desc = "Decrease the current split window's width." })
 keymap.set("n", "<leader>sr", "<C-w>r", { desc = "Rotate split windows." })
-keymap.set("n", "<leader>sl", toggle_split_layout, { desc = "Toggle between horizontal/vertical splits" })
 keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close the current split." })
 keymap.set("n", "<leader>wx", "<cmd>close<CR>", { desc = "Close the current split." })
 keymap.set("n", "<leader>wm", "<cmd>MaximizerToggle<CR>", { desc = "Toggle maximizing/minimizing the current split." })
