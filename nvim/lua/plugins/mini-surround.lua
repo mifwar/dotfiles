@@ -1,4 +1,4 @@
 return {
-  "echasnovski/mini.surround",
+  "nvim-mini/mini.surround",
   lazy = true,
 }
