@@ -13,11 +13,11 @@ return {
     -- Set menu
     dashboard.section.buttons.val = {
       dashboard.button("e", "  > New File", "<cmd>ene<CR>"),
-      dashboard.button("SPC e", "  > Toggle file explorer", "<cmd>NvimTreeToggle<CR>"),
-      dashboard.button("SPC ff", "󰱼 > Find File", "<cmd>Telescope find_files<CR>"),
-      dashboard.button("SPC fs", "  > Find Word", "<cmd>Telescope live_grep<CR>"),
-      dashboard.button("SPC wr", "󰁯  > Restore Session For Current Directory", "<cmd>SessionRestore<CR>"),
-      dashboard.button("q", " > Quit NVIM", "<cmd>qa<CR>"),
+      dashboard.button("SPC e", "  > Toggle file explorer", "<cmd>lua Snacks.explorer()<CR>"),
+      dashboard.button("SPC ff", "󰱼  > Find File", "<cmd>lua Snacks.picker.files()<CR>"),
+      dashboard.button("SPC fs", "  > Find Word", "<cmd>lua Snacks.picker.grep()<CR>"),
+      dashboard.button("SPC qs", "󰁯  > Restore Session", "<cmd>lua require('persistence').load()<CR>"),
+      dashboard.button("q", "  > Quit NVIM", "<cmd>qa<CR>"),
     }
 
     -- Send config to alpha

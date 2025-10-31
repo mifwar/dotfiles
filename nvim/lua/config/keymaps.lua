@@ -1,8 +1,6 @@
 -- Keymaps are automatically loaded on the VeryLazy event
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
--- set leader key to space
-vim.g.mapleader = " "
 
 local keymap = vim.keymap
 
@@ -23,15 +21,12 @@ local function save_as()
     end
   end)
 end
+
 -- General Keymaps
 
 -- exit insert mode
 keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 
--- copilot
--- keymap.set("i", "<C-l>", "copilot#AcceptLine()", { desc = "Accept Copilot suggestion" })
--- keymap.set("i", "<space><tab>", "copilot#AcceptLine()", { desc = "Accept Copilot suggestion" })
---
 -- clear search highlights
 keymap.set("n", "<leader>nh", ":nohl<CR>", { desc = "Clear search highlights" })
 
@@ -57,10 +52,15 @@ keymap.set("n", "<leader>wl", "5<C-w>>", { desc = "Decrease the current split wi
 keymap.set("n", "<leader>sr", "<C-w>r", { desc = "Rotate split windows." })
 keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close the current split." })
 keymap.set("n", "<leader>wx", "<cmd>close<CR>", { desc = "Close the current split." })
-keymap.set("n", "<leader>wm", "<cmd>MaximizerToggle<CR>", { desc = "Toggle maximizing/minimizing the current split." })
 
 -- word wrap
 keymap.set("n", "<leader>z", "<cmd>set wrap!<CR>", { desc = "toggle word wrap" })
+
+-- toggle relative number
+keymap.set("n", "<leader>n", "<cmd>set rnu!<CR>", { desc = "toggle relative number" })
+
+-- toggle tailwind-fold
+keymap.set("n", "<leader>t", "<cmd>TailwindFoldToggle<CR>", { desc = "toggle tailwind fold" })
 
 -- new tab
 keymap.set("n", "<leader>to", "<cmd>tabnew<CR>", { desc = "Open new tab" })
@@ -68,15 +68,6 @@ keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" 
 keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" })
 keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" })
 keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" })
-
--- move line up and down
--- keymap.set("n", "<M-j>", ":m +1<CR>==", { noremap = true, silent = true }) -- Move the current line down with Alt+j
--- keymap.set("n", "<M-k>", ":m -2<CR>==", { noremap = true, silent = true }) -- Move the current line up with Alt+k
--- toggle line number
-keymap.set("n", "<leader>n", "<cmd>set rnu!<CR>", { desc = "toggle relative number" })
-
--- toggle tailwind-fold
-keymap.set("n", "<leader>t", "<cmd>TailwindFoldToggle<CR>", { desc = "toggle tailwind fold" })
 
 -- keymap for `%!jq`
 keymap.set("n", "<leader>jq", "<cmd>%!jq '.'<CR>", { desc = "Run jq filter" })
@@ -94,11 +85,12 @@ keymap.set("n", "<leader>yp", function()
   print("Yanked relative path: " .. filepath)
 end, { desc = "Yank relative file path to clipboard" })
 
--- telescope
-keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<cr>", { desc = "Fuzzy find files in cwd" })
-keymap.set("n", "<leader>fr", "<cmd>Telescope oldfiles<cr>", { desc = "Fuzzy find recent files" })
-keymap.set("n", "<leader>fs", "<cmd>Telescope live_grep<cr>", { desc = "Find string in cwd" })
-keymap.set("n", "<leader>fc", "<cmd>Telescope grep_string<cr>", { desc = "Find string under cursor in cwd" })
+-- Note: <leader>ff, <leader>fr, <leader>fs are provided by LazyVim's Snacks picker by default
+-- Uncomment below only if you want to override LazyVim's defaults
+-- keymap.set("n", "<leader>ff", function() require("snacks").picker.files() end, { desc = "Find files" })
+-- keymap.set("n", "<leader>fr", function() require("snacks").picker.recent() end, { desc = "Recent files" })
+-- keymap.set("n", "<leader>fs", function() require("snacks").picker.grep() end, { desc = "Grep" })
+-- keymap.set("n", "<leader>fc", function() require("snacks").picker.grep_word() end, { desc = "Grep word under cursor" })
 
 keymap.set("i", "<CR>", "<CR>", { noremap = true, desc = "Normal enter behavior" })
 
