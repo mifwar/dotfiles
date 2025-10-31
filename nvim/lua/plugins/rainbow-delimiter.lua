@@ -1,4 +1,4 @@
 return {
-  "hiPhish/rainbow-delimiters.nvim",
+  "HiPhish/rainbow-delimiters.nvim",
   lazy = false,
 }
