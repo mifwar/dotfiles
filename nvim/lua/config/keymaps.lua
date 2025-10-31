@@ -85,12 +85,11 @@ keymap.set("n", "<leader>yp", function()
   print("Yanked relative path: " .. filepath)
 end, { desc = "Yank relative file path to clipboard" })
 
--- Note: <leader>ff, <leader>fr, <leader>fs are provided by LazyVim's Snacks picker by default
--- Uncomment below only if you want to override LazyVim's defaults
--- keymap.set("n", "<leader>ff", function() require("snacks").picker.files() end, { desc = "Find files" })
--- keymap.set("n", "<leader>fr", function() require("snacks").picker.recent() end, { desc = "Recent files" })
--- keymap.set("n", "<leader>fs", function() require("snacks").picker.grep() end, { desc = "Grep" })
--- keymap.set("n", "<leader>fc", function() require("snacks").picker.grep_word() end, { desc = "Grep word under cursor" })
+-- Custom Snacks picker keybindings
+-- Note: <leader>ff and <leader>fr are provided by LazyVim by default
+-- Adding <leader>fs for grep (not provided by default)
+keymap.set("n", "<leader>fs", function() require("snacks").picker.grep() end, { desc = "Find String (Grep)" })
+keymap.set("n", "<leader>fc", function() require("snacks").picker.grep_word() end, { desc = "Find word under Cursor" })
 
 keymap.set("i", "<CR>", "<CR>", { noremap = true, desc = "Normal enter behavior" })
 
