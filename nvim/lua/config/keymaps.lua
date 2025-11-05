@@ -36,6 +36,10 @@ keymap.set("n", "<leader>ft", set_filetype, { desc = "Set filetype" })
 -- save unnamed buffer
 keymap.set("n", "<leader>sa", save_as, { desc = "Save unnamed buffer as..." })
 
+-- new buffer
+keymap.set("n", "<leader>be", "<cmd>enew<CR>", { desc = "Create new buffer (empty)" })
+keymap.set("n", "<leader>bs", "<cmd>new<CR>", { desc = "Create new buffer (split)" })
+
 -- split window
 keymap.set("n", "<leader>s|", "<C-w>v", { desc = "Split the window vertically." })
 keymap.set("n", "<leader>s-", "<C-w>s", { desc = "Split the window horizontally." })
@@ -88,8 +92,12 @@ end, { desc = "Yank relative file path to clipboard" })
 -- Custom Snacks picker keybindings
 -- Note: <leader>ff and <leader>fr are provided by LazyVim by default
 -- Adding <leader>fs for grep (not provided by default)
-keymap.set("n", "<leader>fs", function() require("snacks").picker.grep() end, { desc = "Find String (Grep)" })
-keymap.set("n", "<leader>fc", function() require("snacks").picker.grep_word() end, { desc = "Find word under Cursor" })
+keymap.set("n", "<leader>fs", function()
+  require("snacks").picker.grep()
+end, { desc = "Find String (Grep)" })
+keymap.set("n", "<leader>fc", function()
+  require("snacks").picker.grep_word()
+end, { desc = "Find word under Cursor" })
 
 keymap.set("i", "<CR>", "<CR>", { noremap = true, desc = "Normal enter behavior" })
 
