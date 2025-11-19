@@ -4,6 +4,22 @@
 
 local keymap = vim.keymap
 
+-- Track last accessed tab for switching
+local last_tab = vim.api.nvim_get_current_tabpage()
+
+vim.api.nvim_create_autocmd("TabLeave", {
+  callback = function()
+    last_tab = vim.api.nvim_get_current_tabpage()
+  end,
+})
+
+-- Function to jump to last accessed tab
+local function goto_last_tab()
+  if last_tab and vim.api.nvim_tabpage_is_valid(last_tab) then
+    vim.api.nvim_set_current_tabpage(last_tab)
+  end
+end
+
 -- Function to set filetype with user input
 local function set_filetype()
   vim.ui.input({ prompt = "Enter filetype: " }, function(input)
@@ -72,6 +88,18 @@ keymap.set("n", "<leader>tx", "<cmd>tabclose<CR>", { desc = "Close current tab" 
 keymap.set("n", "<leader>tn", "<cmd>tabn<CR>", { desc = "Go to next tab" })
 keymap.set("n", "<leader>tp", "<cmd>tabp<CR>", { desc = "Go to previous tab" })
 keymap.set("n", "<leader>tf", "<cmd>tabnew %<CR>", { desc = "Open current buffer in new tab" })
+keymap.set("n", "<leader>tl", goto_last_tab, { desc = "Go to last accessed tab" })
+
+-- jump to specific tabs
+keymap.set("n", "<leader>t1", "<cmd>1tabn<CR>", { desc = "Go to tab 1" })
+keymap.set("n", "<leader>t2", "<cmd>2tabn<CR>", { desc = "Go to tab 2" })
+keymap.set("n", "<leader>t3", "<cmd>3tabn<CR>", { desc = "Go to tab 3" })
+keymap.set("n", "<leader>t4", "<cmd>4tabn<CR>", { desc = "Go to tab 4" })
+keymap.set("n", "<leader>t5", "<cmd>5tabn<CR>", { desc = "Go to tab 5" })
+keymap.set("n", "<leader>t6", "<cmd>6tabn<CR>", { desc = "Go to tab 6" })
+keymap.set("n", "<leader>t7", "<cmd>7tabn<CR>", { desc = "Go to tab 7" })
+keymap.set("n", "<leader>t8", "<cmd>8tabn<CR>", { desc = "Go to tab 8" })
+keymap.set("n", "<leader>t9", "<cmd>9tabn<CR>", { desc = "Go to tab 9" })
 
 -- keymap for `%!jq`
 keymap.set("n", "<leader>jq", "<cmd>%!jq '.'<CR>", { desc = "Run jq filter" })
@@ -88,6 +116,46 @@ keymap.set("n", "<leader>yp", function()
   vim.fn.setreg("+", filepath)
   print("Yanked relative path: " .. filepath)
 end, { desc = "Yank relative file path to clipboard" })
+
+-- show full absolute file path
+keymap.set("n", "<leader>fp", function()
+  local filepath = vim.fn.expand("%:p")
+
+  -- Copy to clipboard
+  vim.fn.setreg("+", filepath)
+
+  -- Create a floating window to display the full path
+  local buf = vim.api.nvim_create_buf(false, true)
+  local width = math.min(vim.o.columns - 4, #filepath + 4)
+  local height = math.ceil(#filepath / width) + 2
+
+  local opts = {
+    relative = "editor",
+    width = width,
+    height = height,
+    col = (vim.o.columns - width) / 2,
+    row = (vim.o.lines - height) / 2,
+    style = "minimal",
+    border = "rounded",
+    title = " Full Path (copied to clipboard) ",
+    title_pos = "center",
+  }
+
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, { filepath })
+  local win = vim.api.nvim_open_win(buf, true, opts)
+
+  -- Close on any key press
+  vim.keymap.set("n", "<Esc>", "<cmd>close<CR>", { buffer = buf, nowait = true })
+  vim.keymap.set("n", "q", "<cmd>close<CR>", { buffer = buf, nowait = true })
+  vim.keymap.set("n", "<CR>", "<cmd>close<CR>", { buffer = buf, nowait = true })
+
+  -- Auto-close after 3 seconds
+  vim.defer_fn(function()
+    if vim.api.nvim_win_is_valid(win) then
+      vim.api.nvim_win_close(win, true)
+    end
+  end, 3000)
+end, { desc = "Show full file path (and copy to clipboard)" })
 
 -- Custom Snacks picker keybindings
 -- Note: <leader>ff and <leader>fr are provided by LazyVim by default
