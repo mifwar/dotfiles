@@ -141,6 +141,14 @@ setup_symlinks() {
     if [[ -f "$DOTFILES_DIR/starship.toml" ]]; then
         create_symlink "$DOTFILES_DIR/starship.toml" "$HOME/.config/starship.toml"
     fi
+
+    # Pi coding agent (safe config only; auth/sessions stay local)
+    if [[ -f "$DOTFILES_DIR/pi/keybindings.json" ]]; then
+        create_symlink "$DOTFILES_DIR/pi/keybindings.json" "$HOME/.pi/agent/keybindings.json"
+    fi
+    if [[ -f "$DOTFILES_DIR/pi/settings.json" ]]; then
+        create_symlink "$DOTFILES_DIR/pi/settings.json" "$HOME/.pi/agent/settings.json"
+    fi
 }
 
 # Setup tmux plugin manager
