@@ -29,10 +29,10 @@ return {
       configure = true,
       config = {
         os = {
-          -- LazyGit's built-in nvim-remote preset uses --remote-tab.
-          -- Use --remote instead so pressing `e` opens in the current window.
-          edit = '[ -z "$NVIM" ] && (nvim -- {{filename}}) || (nvim --server "$NVIM" --remote-send "q" && nvim --server "$NVIM" --remote {{filename}})',
-          editAtLine = '[ -z "$NVIM" ] && (nvim +{{line}} -- {{filename}}) || (nvim --server "$NVIM" --remote-send "q" && nvim --server "$NVIM" --remote {{filename}} && nvim --server "$NVIM" --remote-send ":{{line}}<CR>")',
+          -- LazyGit's built-in nvim-remote preset uses --remote-tab and quits lazygit.
+          -- Hide the Snacks terminal instead, so <leader>gg returns to the same lazygit state.
+          edit = '[ -z "$NVIM" ] && (nvim -- {{filename}}) || (nvim --server "$NVIM" --remote-send "<C-\\><C-N>q" && nvim --server "$NVIM" --remote {{filename}})',
+          editAtLine = '[ -z "$NVIM" ] && (nvim +{{line}} -- {{filename}}) || (nvim --server "$NVIM" --remote-send "<C-\\><C-N>q" && nvim --server "$NVIM" --remote {{filename}} && nvim --server "$NVIM" --remote-send ":{{line}}<CR>")',
         },
       },
     },
