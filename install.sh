@@ -98,8 +98,12 @@ install_dependencies() {
         "neovim"
         "tmux"
         "yabai"
-        "skhd" 
+        "skhd"
         "starship"
+        # pass + gpg are required by bin/passc
+        "gnupg"
+        "pinentry-mac"
+        "pass"
     )
     
     for package in "${packages[@]}"; do
@@ -148,6 +152,53 @@ setup_symlinks() {
     fi
     if [[ -f "$DOTFILES_DIR/pi/settings.json" ]]; then
         create_symlink "$DOTFILES_DIR/pi/settings.json" "$HOME/.pi/agent/settings.json"
+    fi
+    if [[ -f "$DOTFILES_DIR/pi/models.json" ]]; then
+        create_symlink "$DOTFILES_DIR/pi/models.json" "$HOME/.pi/agent/models.json"
+    fi
+}
+
+# Build the `tc` Swift helper (transient pasteboard copy) and symlink `passc`
+# into ~/.local/bin. See bin/README.md for the rationale.
+setup_pass_tools() {
+    local bin_dir="$DOTFILES_DIR/bin"
+    [[ -d "$bin_dir" ]] || return 0
+
+    # Ensure ~/.local/bin exists and is on PATH. Some macOS shells don't
+    # include it by default.
+    mkdir -p "$HOME/.local/bin"
+    if ! [[ ":$PATH:" == *":$HOME/.local/bin:"* ]]; then
+        print_warning "~/.local/bin is not on PATH. Add it to your shell rc:"
+        print_warning "    export PATH=\"\$HOME/.local/bin:\$PATH\""
+    fi
+
+    # Xcode Command Line Tools are required to compile the Swift helper.
+    if ! command -v swiftc &>/dev/null; then
+        print_warning "swiftc not found. Install Xcode CLT with: xcode-select --install"
+        print_warning "    (then re-run install.sh to build tc)"
+        return 0
+    fi
+
+    # Compile `tc` if source present and binary missing. Swift sources are
+    # committed; the compiled binary is gitignored and per-arch, so we
+    # always rebuild rather than symlink a foreign-arch binary.
+    if [[ -f "$bin_dir/tc.swift" && ! -x "$bin_dir/tc" ]]; then
+        print_info "Compiling tc (transient pasteboard helper)..."
+        if (cd "$bin_dir" && swiftc tc.swift -o tc); then
+            print_success "Compiled $bin_dir/tc"
+        else
+            print_warning "Failed to compile tc — passc will not work until you build it manually."
+            return 0
+        fi
+    fi
+
+    # Symlink the wrapper script + the Swift binary so `passc` is on PATH
+    # and can find `tc` next to it.
+    if [[ -f "$bin_dir/passc" ]]; then
+        create_symlink "$bin_dir/passc" "$HOME/.local/bin/passc"
+    fi
+    if [[ -x "$bin_dir/tc" ]]; then
+        create_symlink "$bin_dir/tc" "$HOME/.local/bin/tc"
     fi
 }
 
@@ -206,6 +257,7 @@ main() {
     # Setup additional tools
     setup_tmux
     setup_window_management
+    setup_pass_tools
     
     print_success "========================================"
     print_success "   Dotfiles installation complete!"

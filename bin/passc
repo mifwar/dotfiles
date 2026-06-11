@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# passc — copy a `pass` entry to the clipboard without leaving a trace in
+# clipboard managers (Raycast, Maccy, Flycut, …).
+#
+# We can't just override `pass`'s clipboard backend: Homebrew's `pass`
+# 1.7.4 ships a `platform.sh` for macOS that hardcodes `pbcopy` and ignores
+# `PASSWORD_STORE_CLIPBOARD`. So we do the decrypt + copy + auto-clear
+# ourselves, routing the pasteboard write through `tc` (a tiny Swift helper
+# that sets `org.nspasteboard.TransientType`, which clipboard managers
+# honor by skipping the entry).
+#
+# Usage: passc <entry>      # same as `pass -c <entry>`
+#        passc              # no args → show store tree (defer to `pass`)
+
+set -euo pipefail
+
+# Resolve the real location of this script, following symlinks. Required
+# because `passc` gets symlinked into ~/.local/bin/ and BASH_SOURCE[0]
+# contains the symlink path, not the target — without this we'd look for
+# `tc` next to the symlink (where it isn't) instead of next to the real
+# script.
+SOURCE="${BASH_SOURCE[0]}"
+[[ "$SOURCE" != /* ]] && SOURCE="$PWD/$SOURCE"
+while [[ -L "$SOURCE" ]]; do
+    DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ "$SOURCE" != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
+
+TC_BIN="$SCRIPT_DIR/tc"
+PASS_BIN="${PASS_BIN:-/opt/homebrew/bin/pass}"
+
+if [[ ! -x "$TC_BIN" ]]; then
+    echo "passc: '$TC_BIN' not found or not executable." >&2
+    echo "       Run ./install.sh (or 'cd bin && swiftc tc.swift -o tc') to build it." >&2
+    exit 1
+fi
+
+# No-args: defer to `pass` (it prints the store tree by default).
+[[ $# -eq 0 ]] && exec "$PASS_BIN"
+
+# Honor the same env vars `pass` does, in the same precedence order.
+CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-${CLIP_TIME:-45}}"
+sleep_argv0="password store passc clear for user $(id -u)"
+entry="$*"
+
+# Decrypt + copy via `tc`. `pass show` will exit non-zero on a missing entry.
+pass show "$entry" | "$TC_BIN"
+
+# Background auto-clear. The inner ( ... ) is a sub-subshell: `exec -a`
+# replaces *that* child with a renamed `sleep`, so the outer subshell
+# survives to run the clear once sleep returns. The custom argv0 lets a
+# later `passc` invocation pkill any pending clear from a prior run.
+(
+    pkill -f "^$sleep_argv0" 2>/dev/null || true
+    ( exec -a "$sleep_argv0" sleep "$CLIP_TIME" )
+    printf '' | "$TC_BIN"
+) >/dev/null 2>&1 &
+
+echo "Copied '$entry' to clipboard. Will clear in $CLIP_TIME seconds."
