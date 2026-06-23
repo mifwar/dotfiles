@@ -3,6 +3,9 @@
 -- Add any additional keymaps here
 
 local keymap = vim.keymap
+local terminal_panel = require("config.terminal_panel")
+
+terminal_panel.setup()
 
 -- Track last accessed tab for switching
 local last_tab = vim.api.nvim_get_current_tabpage()
@@ -40,6 +43,23 @@ end
 
 -- General Keymaps
 
+-- switch to last buffer
+keymap.set("n", "<leader><leader>", "<cmd>e #<CR>", { desc = "Switch to last buffer" })
+
+-- search and replace word under cursor
+keymap.set("n", "<leader>rw", [[:%s/\<<C-r><C-w>\>/<C-r><C-w>/gI<Left><Left><Left>]], { desc = "Replace word under cursor" })
+
+-- move lines up/down in visual mode
+keymap.set("v", "J", ":m '>+1<CR>gv=gv", { desc = "Move selection down" })
+keymap.set("v", "K", ":m '<-2<CR>gv=gv", { desc = "Move selection up" })
+
+-- delete without yanking (black hole register)
+keymap.set("n", "<leader>d", '"_d', { desc = "Delete without yanking" })
+keymap.set("v", "<leader>d", '"_d', { desc = "Delete without yanking" })
+
+-- send diagnostics to quickfix list
+keymap.set("n", "<leader>xl", "<cmd>lua vim.diagnostic.setqflist()<CR>", { desc = "Diagnostics to quickfix list" })
+
 -- exit insert mode
 keymap.set("i", "jk", "<ESC>", { desc = "Exit insert mode with jk" })
 
@@ -63,6 +83,8 @@ keymap.set("n", "<leader>s-", "<C-w>s", { desc = "Split the window horizontally.
 -- new panes
 keymap.set("n", "<leader>nr", "<cmd>rightbelow vnew<CR>", { desc = "New pane on right" })
 keymap.set("n", "<leader>nb", "<cmd>rightbelow new<CR>", { desc = "New pane on bottom" })
+keymap.set("n", "<leader>pt", terminal_panel.toggle_shell, { desc = "Toggle terminal panel" })
+keymap.set("n", "<leader>pg", terminal_panel.toggle_lazygit, { desc = "Open lazygit panel" })
 keymap.set("n", "<leader>se", "<C-w>=", { desc = "Make all splits equal in size." })
 keymap.set("n", "<leader>we", "<C-w>=", { desc = "Make all splits equal in size." })
 keymap.set("n", "<leader>wj", "5<C-w>+", { desc = "Increase the current split window's height." })
@@ -70,6 +92,23 @@ keymap.set("n", "<leader>wk", "5<C-w>-", { desc = "Decrease the current split wi
 keymap.set("n", "<leader>wh", "5<C-w><", { desc = "Increase the current split window's width." })
 keymap.set("n", "<leader>wl", "5<C-w>>", { desc = "Decrease the current split window's width." })
 keymap.set("n", "<leader>sr", "<C-w>r", { desc = "Rotate split windows." })
+keymap.set("n", "<leader>sl", function()
+  local win_count = vim.fn.winnr("$")
+  if win_count < 2 then
+    return
+  end
+  -- Check if windows are side by side (vertical) or stacked (horizontal)
+  local cur_win = vim.fn.winnr()
+  local cur_col = vim.fn.win_screenpos(cur_win)[2]
+  local other_col = vim.fn.win_screenpos(cur_win == 1 and 2 or 1)[2]
+  if cur_col ~= other_col then
+    -- Vertical split -> convert to horizontal
+    vim.cmd("windo wincmd K")
+  else
+    -- Horizontal split -> convert to vertical
+    vim.cmd("windo wincmd H")
+  end
+end, { desc = "Toggle split layout (horizontal/vertical)" })
 keymap.set("n", "<leader>sx", "<cmd>close<CR>", { desc = "Close the current split." })
 keymap.set("n", "<leader>wx", "<cmd>close<CR>", { desc = "Close the current split." })
 
@@ -103,6 +142,10 @@ keymap.set("n", "<leader>t9", "<cmd>9tabn<CR>", { desc = "Go to tab 9" })
 
 -- keymap for `%!jq`
 keymap.set("n", "<leader>jq", "<cmd>%!jq '.'<CR>", { desc = "Run jq filter" })
+keymap.set("v", "<leader>jq", ":'<,'>!jq '.'<CR>", { desc = "Run jq filter on selection" })
+
+-- yank all (copy entire file to clipboard)
+keymap.set("n", "<leader>ya", "<cmd>%y+<CR>", { desc = "Yank all (copy entire file to clipboard)" })
 
 -- yank relative file path to clipboard
 keymap.set("n", "<leader>yp", function()
