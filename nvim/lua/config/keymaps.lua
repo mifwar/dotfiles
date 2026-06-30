@@ -41,6 +41,21 @@ local function save_as()
   end)
 end
 
+local function copy_to_clipboard(text)
+  vim.fn.setreg("+", text)
+
+  if vim.env.TMUX then
+    local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
+    if ok and type(osc52.copy) == "function" then
+      -- osc52.copy("+") returns a function that accepts a list of {text=...}.
+      local ok_copy = pcall(osc52.copy("+"), { text })
+      if not ok_copy then
+        vim.fn.setreg("+", text)
+      end
+    end
+  end
+end
+
 -- General Keymaps
 
 -- switch to last buffer
@@ -156,7 +171,7 @@ keymap.set("n", "<leader>yp", function()
     filepath = filepath:match("src/.*")
   end
 
-  vim.fn.setreg("+", filepath)
+  copy_to_clipboard(filepath)
   print("Yanked relative path: " .. filepath)
 end, { desc = "Yank relative file path to clipboard" })
 
@@ -165,7 +180,7 @@ keymap.set("n", "<leader>fp", function()
   local filepath = vim.fn.expand("%:p")
 
   -- Copy to clipboard
-  vim.fn.setreg("+", filepath)
+  copy_to_clipboard(filepath)
 
   -- Create a floating window to display the full path
   local buf = vim.api.nvim_create_buf(false, true)

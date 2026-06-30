@@ -1,11 +1,18 @@
 return {
   {
-    "folke/tokyonight.nvim",
+    "catppuccin/nvim",
+    name = "catppuccin",
+    priority = 1000,
     opts = {
-      transparent = true,
-      styles = {
-        sidebars = "dark",
-        floats = "dark",
+      flavour = "macchiato",
+      transparent_background = true,
+      integrations = {
+        cmp = true,
+        gitsigns = true,
+        nvimtree = true,
+        treesitter = true,
+        notify = true,
+        mini = { enabled = true },
       },
     },
   },
