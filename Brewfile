@@ -16,5 +16,8 @@ brew "gnupg"
 brew "pinentry-mac"
 brew "pass"
 
+# Utilities
+brew "pngpaste"
+
 # Fonts
 cask "font-fira-code-nerd-font"

@@ -290,7 +290,7 @@ main() {
     print_success "========================================"
 
     print_info "Next steps:"
-    print_info "1. Restart your terminal or run 'source ~/.zshrc'"
+    print_info "1. Ensure ~/.local/bin is on PATH (add to your shell rc if needed)"
     print_info "2. Open tmux and install plugins with 'Ctrl-a I'"
     print_info "3. Open Neovim and let lazy.nvim install plugins"
     print_info "4. Configure yabai/skhd permissions in System Settings if needed"
