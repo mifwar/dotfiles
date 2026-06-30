@@ -42,13 +42,8 @@ local function save_as()
 end
 
 local function copy_to_clipboard(text)
-  -- Set + register for in-vim paste, pipe to pbcopy for macOS system clipboard.
   vim.fn.setreg("+", text)
-  local f = io.popen("pbcopy", "w")
-  if f then
-    f:write(text)
-    f:close()
-  end
+  vim.fn.setreg("*", text)
 end
 
 -- General Keymaps
