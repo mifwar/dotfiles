@@ -1,0 +1,35 @@
+{
+  "name": "@mifwar/yabai-snapshot",
+  "version": "0.1.0",
+  "description": "Save and restore yabai window layouts with a TUI",
+  "type": "module",
+  "main": "dist/cli.js",
+  "bin": {
+    "ysnap": "dist/cli.js"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.tsx",
+    "format": "prettier --write src",
+    "format:check": "prettier --check src",
+    "postbuild": "chmod +x dist/cli.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": ["yabai", "macos", "tiling-wm", "window-manager", "cli", "tui"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "ink": "^5.0.0",
+    "react": "^18.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.0",
+    "prettier": "^3.3.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.5.0"
+  }
+}
