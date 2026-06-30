@@ -75,6 +75,7 @@ yabai/skhd services via `brew services`.
 - `<leader>sa` — Save unnamed buffer with custom name
 - `<leader>yp` — Yank relative file path
 - `<leader>fp` — Show full file path (and copy to clipboard)
+- `<leader>ya` — Yank entire file to clipboard
 
 #### Snacks Pickers (Fuzzy Finding)
 - `<leader>ff` — Find files
