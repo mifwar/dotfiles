@@ -42,18 +42,9 @@ local function save_as()
 end
 
 local function copy_to_clipboard(text)
+  -- Set + register for in-vim paste, pipe to pbcopy for macOS system clipboard.
   vim.fn.setreg("+", text)
-
-  if vim.env.TMUX then
-    local ok, osc52 = pcall(require, "vim.ui.clipboard.osc52")
-    if ok and type(osc52.copy) == "function" then
-      -- osc52.copy("+") returns a function that accepts a list of {text=...}.
-      local ok_copy = pcall(osc52.copy("+"), { text })
-      if not ok_copy then
-        vim.fn.setreg("+", text)
-      end
-    end
-  end
+  vim.fn.system("pbcopy", text)
 end
 
 -- General Keymaps
