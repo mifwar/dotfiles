@@ -15,6 +15,7 @@ dist/
 # Editor / agent locals (machine-specific)
 .letta/
 .claude/
+pi/models.json
 
 # Stray scratch files
 Untitled
