@@ -1,5 +1,13 @@
 {
-  "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.5",
-  "defaultThinkingLevel": "medium"
+  "defaultProvider": "cline-pass",
+  "defaultModel": "cline-pass/minimax-m3",
+  "defaultThinkingLevel": "high",
+  "lastChangelogVersion": "0.80.2",
+  "packages": [
+    "npm:pi-opencode-bridge",
+    "git:github.com/DietrichGebert/ponytail",
+    "npm:@vndv/pi-codegraph",
+    "npm:pi-cline"
+  ],
+  "theme": "dark"
 }
