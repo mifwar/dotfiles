@@ -1,5 +1,6 @@
 # Get editor completions based on the config schema
 "$schema" = 'https://starship.rs/config-schema.json'
+palette = "catppuccin_macchiato"
 
 # Inserts a blank line between shell prompts
 add_newline = true
@@ -20,8 +21,8 @@ $line_break\
 $character"""
 
 [character]
-success_symbol = "[└ \\$](bold green)"
-error_symbol = "[└ \\$](red)"
+success_symbol = "[└ \\$](bold #a6e3a1)"
+error_symbol = "[└ \\$](#f38ba8)"
 
 # Disable the package module, hiding it from the prompt completely
 [package]
@@ -29,11 +30,11 @@ disabled = true
 
 # [cmd_duration]
 # min_time = 500
-# format = "underwent [$duration](bold yellow)"
+# format = "underwent [$duration](bold #f9e2af)"
 
 [directory]
 truncation_length = 5
-format = " [ ](blue)[$path]($style)[$read_only]($read_only_style) "
+format = " [ ](#89b4fa)[$path]($style)[$read_only]($read_only_style) "
 style = "blue"
 
 [git_branch]
@@ -80,7 +81,7 @@ format = "[$symbol($version )]($style)"
 
 [hostname]
 ssh_only = false
-format = "[](bold green)[$hostname]($style)"
+format = "[](bold #a6e3a1)[$hostname]($style)"
 style = "bold green"
 disabled = false
 trim_at = ".companyname.com"
@@ -101,12 +102,12 @@ format = "via [$symbol($version )]($style)"
 
 [time]
 disabled = false
-format = '[⏲ $time](bold yellow)'
+format = '[⏲ $time](bold #f9e2af)'
 time_format = "%T"
 utc_time_offset = "+7"
 
 [username]
-format = "[┌  ](bold green)[$user]($style)"
+format = "[┌  ](bold #a6e3a1)[$user]($style)"
 disabled = false
 show_always = true
 style_user = "bold green"
@@ -167,3 +168,31 @@ symbol = "󰛥 "
 
 [fill]
 symbol = " "
+
+[palettes.catppuccin_macchiato]
+rosewater = "#f4dbd6"
+flamingo = "#f0c6c6"
+pink = "#f5bde6"
+mauve = "#c6a0f6"
+red = "#ed8796"
+maroon = "#ee99a0"
+peach = "#f5a97f"
+yellow = "#eed49f"
+green = "#a6da95"
+teal = "#8bd5ca"
+sky = "#91d7e3"
+sapphire = "#7dc4e4"
+blue = "#8aadf4"
+lavender = "#b7bdf8"
+text = "#cad3f5"
+subtext1 = "#b8c0e0"
+subtext0 = "#a5adcb"
+overlay2 = "#939ab7"
+overlay1 = "#8087a2"
+overlay0 = "#6e738d"
+surface2 = "#5b6078"
+surface1 = "#494d64"
+surface0 = "#363a4f"
+base = "#24273a"
+mantle = "#1e2030"
+crust = "#181926"

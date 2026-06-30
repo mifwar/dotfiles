@@ -29,7 +29,12 @@ done
 SCRIPT_DIR="$(cd -P "$(dirname "$SOURCE")" && pwd)"
 
 TC_BIN="$SCRIPT_DIR/tc"
-PASS_BIN="${PASS_BIN:-/opt/homebrew/bin/pass}"
+PASS_BIN="${PASS_BIN:-$(command -v pass || true)}"
+
+if [[ -z "$PASS_BIN" || ! -x "$PASS_BIN" ]]; then
+    echo "passc: pass not found on PATH. Install with: brew install pass" >&2
+    exit 1
+fi
 
 if [[ ! -x "$TC_BIN" ]]; then
     echo "passc: '$TC_BIN' not found or not executable." >&2

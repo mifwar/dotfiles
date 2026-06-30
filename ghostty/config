@@ -41,5 +41,6 @@
 # # which is explained in the docs for that config option.
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
-theme = dark:catppuccin-macchiato,light:catppuccin-latte
-font-size = 12
+theme = dark:Catppuccin Macchiato,light:Catppuccin Latte
+font-size = 14
+keybind = shift+enter=text:\x1b\r
