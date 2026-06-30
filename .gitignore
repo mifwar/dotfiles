@@ -1,2 +1,23 @@
-# Compiled Swift binaries
+# Compiled Swift binaries (per-arch, built locally)
 bin/tc
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+.nvimlog
+
+# Node (yabai-snapshot)
+node_modules/
+dist/
+
+# Editor / agent locals (machine-specific)
+.letta/
+.claude/
+
+# Stray scratch files
+Untitled
+
+# Ad-hoc demo / scratch screenshots
+raycast/scripts/DEMO MONEY MANAGER WORKSPACE.png
