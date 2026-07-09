@@ -149,6 +149,11 @@ keymap.set("n", "<leader>t9", "<cmd>9tabn<CR>", { desc = "Go to tab 9" })
 keymap.set("n", "<leader>jq", "<cmd>%!jq '.'<CR>", { desc = "Run jq filter" })
 keymap.set("v", "<leader>jq", ":'<,'>!jq '.'<CR>", { desc = "Run jq filter on selection" })
 
+-- format HTML/JSX/TSX via prettier (works on any buffer, no filetype needed)
+keymap.set("n", "<leader>fh", "<cmd>%!~/.local/share/nvim/mason/bin/prettier --parser html<CR>", { desc = "Format as HTML" })
+keymap.set("n", "<leader>fj", "<cmd>%!~/.local/share/nvim/mason/bin/prettier --parser babel<CR>", { desc = "Format as JSX" })
+keymap.set("n", "<leader>ft", "<cmd>%!~/.local/share/nvim/mason/bin/prettier --parser typescript<CR>", { desc = "Format as TSX" })
+
 -- yank all (copy entire file to clipboard)
 keymap.set("n", "<leader>ya", "<cmd>%y+<CR>", { desc = "Yank all (copy entire file to clipboard)" })
 
