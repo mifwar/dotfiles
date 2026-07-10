@@ -1,8 +1,8 @@
 {
-  "defaultProvider": "cline-pass",
-  "defaultModel": "cline-pass/minimax-m3",
+  "defaultProvider": "opencode-go",
+  "defaultModel": "deepseek-v4-pro",
   "defaultThinkingLevel": "high",
-  "lastChangelogVersion": "0.80.2",
+  "lastChangelogVersion": "0.80.3",
   "packages": [
     "npm:pi-opencode-bridge",
     "git:github.com/DietrichGebert/ponytail",

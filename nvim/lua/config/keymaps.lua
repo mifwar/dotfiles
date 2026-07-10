@@ -150,9 +150,35 @@ keymap.set("n", "<leader>jq", "<cmd>%!jq '.'<CR>", { desc = "Run jq filter" })
 keymap.set("v", "<leader>jq", ":'<,'>!jq '.'<CR>", { desc = "Run jq filter on selection" })
 
 -- format HTML/JSX/TSX via prettier (works on any buffer, no filetype needed)
-keymap.set("n", "<leader>fh", "<cmd>%!~/.local/share/nvim/mason/bin/prettier --parser html<CR>", { desc = "Format as HTML" })
-keymap.set("n", "<leader>fj", "<cmd>%!~/.local/share/nvim/mason/bin/prettier --parser babel<CR>", { desc = "Format as JSX" })
-keymap.set("n", "<leader>ft", "<cmd>%!~/.local/share/nvim/mason/bin/prettier --parser typescript<CR>", { desc = "Format as TSX" })
+local function find_prettier()
+  -- Check system PATH first
+  local bin = vim.fn.exepath("prettier")
+  if bin ~= "" then return bin end
+  -- Fallback: Mason default install path
+  local mason_bin = vim.fn.stdpath("data") .. "/mason/bin/prettier"
+  if vim.fn.executable(mason_bin) == 1 then return mason_bin end
+  return nil
+end
+
+local function format_with_prettier(parser)
+  local prettier = find_prettier()
+  if not prettier then
+    vim.notify("prettier not found", vim.log.levels.ERROR)
+    return
+  end
+  local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+  local input = table.concat(lines, "\n")
+  local output = vim.fn.system({ prettier, "--parser", parser }, input)
+  if vim.v.shell_error ~= 0 then
+    vim.notify("prettier error: " .. output, vim.log.levels.ERROR)
+    return
+  end
+  vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.split(output, "\n"))
+end
+
+keymap.set("n", "<leader>fH", function() format_with_prettier("html") end, { desc = "Format as HTML" })
+keymap.set("n", "<leader>fJ", function() format_with_prettier("babel") end, { desc = "Format as JSX" })
+keymap.set("n", "<leader>fT", function() format_with_prettier("typescript") end, { desc = "Format as TSX" })
 
 -- yank all (copy entire file to clipboard)
 keymap.set("n", "<leader>ya", "<cmd>%y+<CR>", { desc = "Yank all (copy entire file to clipboard)" })
