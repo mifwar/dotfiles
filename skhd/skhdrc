@@ -40,6 +40,18 @@ shift + alt - t : yabai -m window --toggle float --grid 12:12:1:1:10:10
 # Small PiP window in bottom-right corner (always on top)
 shift + alt - p : yabai -m window --toggle float --grid 12:12:9:9:3:2 --layer above
 
+# Popup windows, floating + always on top (grid <rows>:<cols>:<x>:<y>:<w>:<h>)
+# corners/edges, PiP size
+shift + ctrl + cmd - u : yabai -m window --toggle float --grid 12:24:0:0:4:2 --layer above    # top-left
+shift + ctrl + cmd - i : yabai -m window --toggle float --grid 12:24:20:0:4:2 --layer above   # top-right
+shift + ctrl + cmd - j : yabai -m window --toggle float --grid 12:24:0:10:4:2 --layer above   # bottom-left
+shift + ctrl + cmd - k : yabai -m window --toggle float --grid 12:24:20:10:4:2 --layer above  # bottom-right
+shift + ctrl + cmd - n : yabai -m window --toggle float --grid 12:24:10:10:4:2 --layer above  # bottom-center
+
+# sizes, bottom-right corner
+shift + ctrl - g : yabai -m window --toggle float --grid 12:24:19:10:4:2 --layer above   # ~PiP size, 16:9
+shift + alt - g : yabai -m window --toggle float --grid 12:24:21:10:2:2 --layer above   # tiny square
+
 
 # move toggled window
 shift + alt - h : yabai -m window --move rel:-20:0
