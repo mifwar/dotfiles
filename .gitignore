@@ -15,7 +15,7 @@ dist/
 # Editor / agent locals (machine-specific)
 .letta/
 .claude/
-pi/models.json
+.tmp-codex-profile/
 
 # Stray scratch files
 Untitled

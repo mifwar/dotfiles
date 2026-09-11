@@ -171,7 +171,8 @@ setup_symlinks() {
             "$HOME/Library/Application Support/com.mitchellh.ghostty/config"
     fi
 
-    # Pi coding agent (safe config only; auth/sessions stay local)
+    # Pi coding agent. Credentials stay in the private pass store (github.com/mifwar/pwdvault);
+    # models.json only carries `!pass show <entry>` pointers, so it's safe to version here.
     if [[ -f "$DOTFILES_DIR/pi/keybindings.json" ]]; then
         create_symlink "$DOTFILES_DIR/pi/keybindings.json" "$HOME/.pi/agent/keybindings.json"
     fi
@@ -180,6 +181,10 @@ setup_symlinks() {
     fi
     if [[ -f "$DOTFILES_DIR/pi/models.json" ]]; then
         create_symlink "$DOTFILES_DIR/pi/models.json" "$HOME/.pi/agent/models.json"
+    fi
+    # Whole dir, so every extension is versioned, not just cmd-bridge.
+    if [[ -d "$DOTFILES_DIR/pi/extensions" ]]; then
+        create_symlink "$DOTFILES_DIR/pi/extensions" "$HOME/.pi/agent/extensions"
     fi
 }
 
