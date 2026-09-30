@@ -149,6 +149,21 @@ setup_symlinks() {
     if [[ -f "$DOTFILES_DIR/tmux/.tmux.conf" ]]; then
         create_symlink "$DOTFILES_DIR/tmux/.tmux.conf" "$HOME/.tmux.conf"
     fi
+    if [[ -f "$DOTFILES_DIR/tmux/close-idle-panes.sh" ]]; then
+        create_symlink "$DOTFILES_DIR/tmux/close-idle-panes.sh" "$HOME/.tmux/close-idle-panes.sh"
+    fi
+    if [[ -f "$DOTFILES_DIR/tmux/track-unused-pane.zsh" ]]; then
+        create_symlink "$DOTFILES_DIR/tmux/track-unused-pane.zsh" "$HOME/.tmux/track-unused-pane.zsh"
+        if ! grep -qF '# Dotfiles: track untouched tmux panes' "$HOME/.zshrc" 2>/dev/null; then
+            cat >> "$HOME/.zshrc" <<'ZSH'
+
+# Dotfiles: track untouched tmux panes (initial shell startup only).
+if [[ -o interactive && $ZSH_EVAL_CONTEXT == file && -f "$HOME/.tmux/track-unused-pane.zsh" ]]; then
+    source "$HOME/.tmux/track-unused-pane.zsh"
+fi
+ZSH
+        fi
+    fi
 
     # Yabai
     if [[ -d "$DOTFILES_DIR/yabai" ]]; then

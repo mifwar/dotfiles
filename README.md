@@ -114,6 +114,9 @@ yabai/skhd services via `brew services`.
 - `Ctrl-a |` — Split horizontally
 - `Ctrl-a -` — Split vertically
 - `Ctrl-a m` — Maximize/restore pane
+- `Ctrl-a N` / `Ctrl-a P` — Next/previous pane by number, always maximized
+- `Ctrl-a ;` — Jump to the previously active pane, always maximized
+- `Ctrl-a X` — Confirm closing untouched zsh panes in the current window, in any directory. Keeps the active pane, panes with jobs, and panes where you typed or ran anything. Tracking starts in newly opened panes; older untracked panes are kept.
 - `Ctrl-a r` — Reload config
 - `Ctrl-a n` — Rename pane
 
