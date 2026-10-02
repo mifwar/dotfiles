@@ -8,13 +8,14 @@ The standard `pass -c <entry>` writes the password to the system pasteboard
 via `pbcopy`. Any clipboard manager hooked into `NSPasteboard` change
 notifications (Raycast, Maccy, Flycut, …) will record it.
 
-`passc` is a thin wrapper around `pass -c` that swaps the clipboard backend
-for `tc` (a tiny Swift binary in this directory). `tc` writes to the
-pasteboard with `NSPasteboardItem.setAccessBehavior(.transient)`, which
-well-behaved clipboard managers honor by skipping the entry.
+`passc` decrypts with `pass show`, then copies only the first password line
+without a trailing newline through `tc` (a tiny Swift binary in this
+directory). `tc` marks the pasteboard with `org.nspasteboard.TransientType`,
+which well-behaved clipboard managers honor by skipping the entry.
 
-`pass` still calls `tc` twice — once with the password, then again with
-empty stdin after the clipboard TTL — so auto-clear continues to work.
+`passc` calls `tc` twice — once with the password, then again with empty
+stdin after the clipboard TTL. Failed decryption leaves the clipboard
+untouched.
 
 ### Build
 

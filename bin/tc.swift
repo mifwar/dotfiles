@@ -9,7 +9,10 @@
 import AppKit
 
 let data = FileHandle.standardInput.readDataToEndOfFile()
-let content = String(data: data, encoding: .utf8) ?? ""
+guard let content = String(data: data, encoding: .utf8) else {
+    FileHandle.standardError.write(Data("tc: input is not valid UTF-8\n".utf8))
+    exit(1)
+}
 let pb = NSPasteboard.general
 
 if content.isEmpty {
@@ -20,5 +23,8 @@ if content.isEmpty {
     // type and exclude matching entries from history.
     let transient = NSPasteboard.PasteboardType("org.nspasteboard.TransientType")
     pb.declareTypes([.string, transient], owner: nil)
-    pb.setString(content, forType: .string)
+    guard pb.setString(content, forType: .string) else {
+        FileHandle.standardError.write(Data("tc: could not write to the clipboard\n".utf8))
+        exit(1)
+    }
 }

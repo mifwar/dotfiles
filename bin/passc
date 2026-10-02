@@ -50,8 +50,16 @@ CLIP_TIME="${PASSWORD_STORE_CLIP_TIME:-${CLIP_TIME:-45}}"
 sleep_argv0="password store passc clear for user $(id -u)"
 entry="$*"
 
-# Decrypt + copy via `tc`. `pass show` will exit non-zero on a missing entry.
-pass show "$entry" | "$TC_BIN"
+# Finish decryption successfully before touching the clipboard. Match
+# `pass -c` by copying only the first line, without a trailing newline.
+password="$("$PASS_BIN" show "$entry")"
+password="${password%%$'\n'*}"
+if [[ -z "$password" ]]; then
+    echo "passc: entry '$entry' has no password on the first line." >&2
+    exit 1
+fi
+printf '%s' "$password" | "$TC_BIN"
+unset password
 
 # Background auto-clear. The inner ( ... ) is a sub-subshell: `exec -a`
 # replaces *that* child with a renamed `sleep`, so the outer subshell
