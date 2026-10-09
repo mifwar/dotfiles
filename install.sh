@@ -197,7 +197,7 @@ ZSH
     if [[ -f "$DOTFILES_DIR/pi/models.json" ]]; then
         create_symlink "$DOTFILES_DIR/pi/models.json" "$HOME/.pi/agent/models.json"
     fi
-    # Whole dir, so every extension is versioned, not just cmd-bridge.
+    # Whole dir, so every extension is versioned.
     if [[ -d "$DOTFILES_DIR/pi/extensions" ]]; then
         create_symlink "$DOTFILES_DIR/pi/extensions" "$HOME/.pi/agent/extensions"
     fi
