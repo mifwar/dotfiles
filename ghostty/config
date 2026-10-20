@@ -44,3 +44,10 @@
 theme = dark:Catppuccin Macchiato,light:Catppuccin Latte
 font-size = 14
 keybind = shift+enter=text:\x1b\r
+# Cmd+Opt+Left/Right -> C-M-Left/Right, which tmux uses to switch windows
+keybind = cmd+alt+left=csi:1;7D
+keybind = cmd+alt+right=csi:1;7C
+
+# Secure Keyboard Entry is global: while any app holds it, skhd's event tap is
+# disabled and skhd exits 1 on launch ("secure keyboard entry is enabled … abort").
+macos-auto-secure-input = false

@@ -1,0 +1,15 @@
+#!/bin/sh
+
+set -eu
+
+grid=${1:?"usage: yabai-toggle-float ROWS:COLS:X:Y:WIDTH:HEIGHT"}
+
+if yabai -m query --windows --window | jq -e '."is-floating"' >/dev/null; then
+    yabai -m window --sub-layer auto 2>/dev/null || true
+    exec yabai -m window --toggle float
+fi
+
+yabai -m window --toggle float
+yabai -m window --grid "$grid"
+# pin above normal windows; needs the scripting-addition, otherwise no-op
+yabai -m window --sub-layer above 2>/dev/null || true

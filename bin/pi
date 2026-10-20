@@ -1,0 +1,4 @@
+#!/bin/sh
+# pi needs Node >= 22.19, but the shell defaults to node@20. Run it (and any
+# node it spawns) on Homebrew's current node instead.
+PATH="/opt/homebrew/bin:$PATH" exec /opt/homebrew/bin/pi "$@"

@@ -1,0 +1,27 @@
+{
+  "description": "Audible alerts for completed turns and approval requests.",
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/bin/codex-sound-hook help",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.local/bin/codex-sound-hook done",
+            "timeout": 3
+          }
+        ]
+      }
+    ]
+  }
+}

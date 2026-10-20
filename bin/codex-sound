@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+state_file="${CODEX_SOUND_STATE_FILE:-$HOME/.codex/sound.txt}"
+
+sounds_on() {
+    [[ ! -f "$state_file" || "$(<"$state_file")" != "0" ]]
+}
+
+case "${1:-toggle}" in
+    on)
+        state=1
+        ;;
+    off)
+        state=0
+        ;;
+    status)
+        if sounds_on; then
+            echo "Codex sounds: on"
+        else
+            echo "Codex sounds: off"
+        fi
+        exit 0
+        ;;
+    toggle)
+        if sounds_on; then
+            state=0
+        else
+            state=1
+        fi
+        ;;
+    *)
+        echo "Usage: codex-sound [on|off|status]" >&2
+        exit 2
+        ;;
+esac
+
+mkdir -p "$(dirname "$state_file")"
+printf '%s\n' "$state" > "$state_file"
+
+if [[ "$state" == "1" ]]; then
+    echo "Codex sounds: on"
+else
+    echo "Codex sounds: off"
+fi

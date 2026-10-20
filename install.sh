@@ -111,11 +111,12 @@ install_dependencies() {
     fi
 
     # Fallback: install each package individually.
+    brew tap asmvik/formulae
     local packages=(
         "neovim"
         "tmux"
-        "yabai"
-        "skhd"
+        "asmvik/formulae/yabai"
+        "asmvik/formulae/skhd"
         "starship"
         "cliclick"
         "jq"
@@ -201,11 +202,21 @@ ZSH
     if [[ -d "$DOTFILES_DIR/pi/extensions" ]]; then
         create_symlink "$DOTFILES_DIR/pi/extensions" "$HOME/.pi/agent/extensions"
     fi
+
+    # Pen desktop app uses its own pi model config (pi providers + custom providers)
+    if [[ -f "$DOTFILES_DIR/pi/pencil-models.json" ]]; then
+        create_symlink "$DOTFILES_DIR/pi/pencil-models.json" "$HOME/.pencil/models.json"
+    fi
+
+    # Codex lifecycle hooks (auth, sessions, and machine-local config stay local)
+    if [[ -f "$DOTFILES_DIR/codex/hooks.json" ]]; then
+        create_symlink "$DOTFILES_DIR/codex/hooks.json" "$HOME/.codex/hooks.json"
+    fi
 }
 
-# Build the `tc` Swift helper (transient pasteboard copy) and symlink `passc`
-# into ~/.local/bin. See bin/README.md for the rationale.
-setup_pass_tools() {
+# Install repository-managed helper commands into ~/.local/bin. Build the `tc`
+# Swift helper when needed. See bin/README.md for details.
+setup_local_bin() {
     local bin_dir="$DOTFILES_DIR/bin"
     [[ -d "$bin_dir" ]] || return 0
 
@@ -245,6 +256,24 @@ setup_pass_tools() {
     if [[ -x "$bin_dir/tc" ]]; then
         create_symlink "$bin_dir/tc" "$HOME/.local/bin/tc"
     fi
+    if [[ -f "$bin_dir/yabai-toggle-float" ]]; then
+        create_symlink "$bin_dir/yabai-toggle-float" "$HOME/.local/bin/yabai-toggle-float"
+    fi
+    if [[ -f "$bin_dir/codex-sound" ]]; then
+        create_symlink "$bin_dir/codex-sound" "$HOME/.local/bin/codex-sound"
+    fi
+    if [[ -f "$bin_dir/codex-sound-hook" ]]; then
+        create_symlink "$bin_dir/codex-sound-hook" "$HOME/.local/bin/codex-sound-hook"
+    fi
+    if [[ -f "$bin_dir/codex-tmux-limits" ]]; then
+        create_symlink "$bin_dir/codex-tmux-limits" "$HOME/.local/bin/codex-tmux-limits"
+    fi
+    if [[ -f "$bin_dir/tm" ]]; then
+        create_symlink "$bin_dir/tm" "$HOME/.local/bin/tm"
+    fi
+    if [[ -f "$bin_dir/pi" ]]; then
+        create_symlink "$bin_dir/pi" "$HOME/.local/bin/pi"
+    fi
 }
 
 # Setup tmux plugin manager
@@ -262,22 +291,23 @@ setup_tmux() {
     fi
 }
 
-# Setup yabai and skhd services via brew services (handles launchd plists)
+# Setup yabai and skhd services via their native launchd helpers.
 setup_window_management() {
     print_info "Setting up window management services..."
 
     if command -v yabai &> /dev/null; then
-        print_info "Starting yabai service via brew services..."
-        brew services start yabai || print_warning "Could not start yabai. Start manually with: brew services start yabai"
+        print_info "Starting yabai service..."
+        yabai --start-service || print_warning "Could not start yabai. Start manually with: yabai --start-service"
     fi
 
     if command -v skhd &> /dev/null; then
-        print_info "Starting skhd service via brew services..."
-        brew services start skhd || print_warning "Could not start skhd. Start manually with: brew services start skhd"
+        print_info "Starting skhd service..."
+        skhd --start-service || print_warning "Could not start skhd. Start manually with: skhd --start-service"
     fi
 
-    print_info "Note: yabai/skhd require Accessibility (and yabai needs Screen Recording) permissions."
-    print_info "      System Settings -> Privacy & Security -> Accessibility / Screen Recording"
+    print_info "Note: yabai/skhd require Accessibility permission."
+    print_info "      System Settings -> Privacy & Security -> Accessibility"
+    print_info "      Screen Recording is only needed if you enable yabai window animations."
 }
 
 # Main installation process
@@ -303,7 +333,7 @@ main() {
     # Setup additional tools
     setup_tmux
     setup_window_management
-    setup_pass_tools
+    setup_local_bin
 
     print_success "========================================"
     print_success "   Dotfiles installation complete!"

@@ -25,3 +25,10 @@ raycast/scripts/DEMO MONEY MANAGER WORKSPACE.png
 
 # CodeGraph index
 .codegraph/
+pi/settings.json
+
+# Local scratch / agent leftovers
+.temp.json
+.codex-credits-sh.sh
+20[0-9][0-9]-*.txt
+pi/*.bak.*

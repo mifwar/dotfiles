@@ -1,0 +1,230 @@
+#!/usr/bin/env python3
+"""wa-stash — move WhatsApp (macOS app) media to a review folder, reversibly.
+
+Flow:
+  1. wa-stash list                  # chats ranked by media size
+  2. wa-stash stash --chat "SWK"    # move media to ~/WhatsApp Media Review/<chat>/
+  3. browse in Finder, Quick Look, delete what you don't want
+  4. wa-stash restore               # move back everything you didn't delete
+
+Never deletes anything itself. Phone is untouched at all times.
+"""
+
+import argparse
+import json
+import os
+import shutil
+import sqlite3
+import subprocess
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+CONTAINER = Path.home() / "Library/Group Containers/group.net.whatsapp.WhatsApp.shared"
+MEDIA = CONTAINER / "Message/Media"
+DB = CONTAINER / "ChatStorage.sqlite"
+STASH = Path.home() / "WhatsApp Media Review"
+MANIFEST = STASH / ".manifest.jsonl"
+
+
+def die(msg):
+    sys.exit(f"wa-stash: {msg}")
+
+
+def check_whatsapp_closed():
+    if subprocess.run(["pgrep", "-f", "WhatsApp.app"], capture_output=True).returncode == 0:
+        die("WhatsApp is running — quit it first (it rewrites files while it runs).")
+
+
+def chat_names():
+    """JID -> display name, read-only snapshot of the chat DB."""
+    try:
+        con = sqlite3.connect(f"file:{DB}?immutable=1", uri=True)
+        rows = con.execute(
+            "SELECT ZCONTACTJID, COALESCE(NULLIF(ZPARTNERNAME,''), ZCONTACTJID) "
+            "FROM ZWACHATSESSION"
+        ).fetchall()
+        con.close()
+        return dict(rows)
+    except Exception:
+        return {}
+
+
+def safe_name(s):
+    return "".join(c for c in s if c not in "/:").strip() or "unknown"
+
+
+def human(n):
+    for unit in ("B", "KB", "MB", "GB", "TB"):
+        if n < 1024 or unit == "TB":
+            return f"{n:,.0f} {unit}" if unit == "B" else f"{n:,.1f} {unit}"
+        n /= 1024
+
+
+def chat_media_files(jid):
+    for p in sorted((MEDIA / jid).rglob("*")):
+        if p.is_file() and p.suffix != ".thumb":  # thumbs stay: tiny, keep chats renderable
+            yield p
+
+
+def manifest_load():
+    if not MANIFEST.exists():
+        return []
+    return [json.loads(l) for l in MANIFEST.read_text().splitlines() if l.strip()]
+
+
+def manifest_write(entries):
+    MANIFEST.parent.mkdir(parents=True, exist_ok=True)
+    with MANIFEST.open("w") as f:
+        for e in entries:
+            f.write(json.dumps(e) + "\n")
+
+
+def mv(src: Path, dst: Path):
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        os.rename(src, dst)  # same volume: atomic + instant
+    except OSError:
+        shutil.move(str(src), str(dst))
+
+
+def pick_chats(args, names):
+    """Chat dirs under MEDIA, optionally filtered by --chat (matches name or jid)."""
+    chats = sorted(p.name for p in MEDIA.iterdir() if p.is_dir())
+    if not args.chat:
+        return chats
+    needle = args.chat.lower()
+    return [j for j in chats if needle in names.get(j, "").lower() or needle in j.lower()]
+
+
+def cmd_list(args):
+    names = chat_names()
+    rows = []
+    for jid in pick_chats(args, names):
+        files = list(chat_media_files(jid))
+        if files:
+            rows.append((sum(f.stat().st_size for f in files), len(files), jid))
+    rows.sort(reverse=True)
+    for size, count, jid in rows:
+        print(f"{human(size):>12}  {count:>6} files  {names.get(jid, jid)}  [{jid}]")
+    if not rows:
+        print("no chat matches")
+
+
+def cmd_stash(args):
+    check_whatsapp_closed()
+    names = chat_names()
+    chats = pick_chats(args, names)
+    if not chats:
+        die(f"no chat matches {args.chat!r} — run 'wa-stash list' to see names")
+
+    exts = {e.lower().lstrip(".") for e in args.ext.split(",")} if args.ext else None
+    min_size = args.min_size
+    entries = manifest_load()
+    stashed = {e["src"] for e in entries}
+    moved, moved_bytes = 0, 0
+
+    for jid in chats:
+        label = safe_name(names.get(jid, jid))
+        files = [f for f in chat_media_files(jid) if f.stat().st_size >= min_size]
+        if exts:
+            files = [f for f in files if f.suffix.lower().lstrip(".") in exts]
+        files.sort(key=lambda f: f.stat().st_size, reverse=True)
+        for src in files:
+            if args.limit and moved >= args.limit:
+                break
+            if str(src) in stashed:  # moved in a previous run
+                continue
+            dst = STASH / label / src.name
+            if dst.exists():
+                continue
+            if not args.dry_run:
+                mv(src, dst)
+            entries.append({
+                "src": str(src), "dst": str(dst), "chat": label,
+                "size": src.stat().st_size if args.dry_run else dst.stat().st_size,
+                "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            })
+            moved += 1
+            moved_bytes += entries[-1]["size"]
+        if args.limit and moved >= args.limit:
+            break
+
+    if not args.dry_run:
+        manifest_write(entries)
+    verb = "would move" if args.dry_run else "moved"
+    print(f"{verb}: {moved} files, {human(moved_bytes)}")
+    if moved and not args.dry_run:
+        print(f"review them:  open \"{STASH}\"")
+
+
+def cmd_restore(args):
+    check_whatsapp_closed()
+    entries = manifest_load()
+    if args.chat:
+        needle = args.chat.lower()
+        entries = [e for e in entries
+                   if needle in e["chat"].lower() or needle in Path(e["src"]).parent.parent.name.lower()]
+    kept, restored, restored_bytes, deleted = [], 0, 0, 0
+    for e in entries:
+        dst = Path(e["dst"])
+        if not dst.exists():  # user deleted it in Finder: that's the point
+            deleted += 1
+            continue
+        if args.dry_run:
+            kept.append(e)
+            continue
+        mv(dst, Path(e["src"]))
+        restored += 1
+        restored_bytes += e["size"]
+    if not args.dry_run:
+        manifest_write(kept)
+    if args.dry_run:
+        pending = sum(1 for e in entries if Path(e["dst"]).exists())
+        print(f"in stash: {pending} files, {human(sum(e['size'] for e in entries if Path(e['dst']).exists()))}")
+    else:
+        print(f"restored: {restored} files ({human(restored_bytes)}) back into WhatsApp")
+        print(f"deleted:  {deleted} files — space reclaimed on the Mac only, phone unaffected")
+
+
+def cmd_open(_args):
+    if not STASH.exists():
+        die(f"{STASH} doesn't exist yet — run 'wa-stash stash' first")
+    subprocess.run(["open", str(STASH)])
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p = sub.add_parser("list", help="chats ranked by media size")
+    p.add_argument("--chat", help="filter by name/jid substring")
+    p.set_defaults(fn=cmd_list)
+
+    p = sub.add_parser("stash", help="move media out to the review folder")
+    p.add_argument("--chat", help="chat name/jid substring (required filter)")
+    p.add_argument("--all-chats", action="store_true", help="every chat (careful)")
+    p.add_argument("--min-size", type=int, default=1024 * 1024, help="min size in bytes (default 1MB)")
+    p.add_argument("--ext", help="comma-separated extensions, e.g. mp4,jpg")
+    p.add_argument("--limit", type=int, help="stop after N files (largest first)")
+    p.add_argument("--dry-run", action="store_true")
+    p.set_defaults(fn=cmd_stash)
+
+    p = sub.add_parser("restore", help="move non-deleted files back into WhatsApp")
+    p.add_argument("--chat", help="restore only this chat")
+    p.add_argument("--dry-run", action="store_true", help="show what's in the stash")
+    p.set_defaults(fn=cmd_restore)
+
+    p = sub.add_parser("open", help="open the review folder in Finder")
+    p.set_defaults(fn=cmd_open)
+
+    args = ap.parse_args()
+    if not MEDIA.exists():
+        die(f"WhatsApp media not found at {MEDIA}")
+    if args.cmd == "stash" and not args.all_chats and not args.chat:
+        die("give --chat (see 'wa-stash list') or --all-chats")
+    args.fn(args)
+
+
+if __name__ == "__main__":
+    main()
