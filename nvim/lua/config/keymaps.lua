@@ -1,7 +1,3 @@
--- Keymaps are automatically loaded on the VeryLazy event
--- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
--- Add any additional keymaps here
-
 local keymap = vim.keymap
 local terminal_panel = require("config.terminal_panel")
 
@@ -182,6 +178,14 @@ keymap.set("n", "<leader>fT", function() format_with_prettier("typescript") end,
 
 -- yank all (copy entire file to clipboard)
 keymap.set("n", "<leader>ya", "<cmd>%y+<CR>", { desc = "Yank all (copy entire file to clipboard)" })
+
+-- copy current working directory to clipboard
+vim.api.nvim_create_user_command("Pwdc", function()
+  local cwd = vim.fn.getcwd()
+  copy_to_clipboard(cwd)
+  print("Copied cwd: " .. cwd)
+end, {})
+vim.cmd("cnoreabbrev pwdc Pwdc")
 
 -- yank relative file path to clipboard
 keymap.set("n", "<leader>yp", function()
