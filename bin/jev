@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+# jev — ask TypeSafe's Jev (System One) typed questions about a state.
+#
+#   echo '{"state":"...","questions":{"u":{"type":"noul","instructions":"..."}}}' | jev
+#   jev -n "Does this convey urgency?" "help, payouts failing for 3 days"
+#   cat request.json | jev --raw | jq .answers
+#
+# Key from $TYPESAFE_API_KEY, else ~/.config/typesafe/key, else `pass show jev/personal`.
+set -euo pipefail
+
+key_file="$HOME/.config/typesafe/key"
+api="${TYPESAFE_API_URL:-https://api.typesafe.ai/v1/systemone}"
+
+render() {
+  jq -r '
+    .answers | to_entries[] | .value as $a |
+    if   $a.type == "choice" then "\(.key)\t\($a.choice)\tconf \($a.confidence)\t\($a.probabilities | to_entries | map("\(.key)=\(.value)") | join("  "))"
+    elif $a.type == "score"  then "\(.key)\t\($a.score)\tconf \($a.confidence)\t\($a.probabilities | to_entries | map("\(.key)=\(.value)") | join("  "))"
+    else   "\(.key)\tp(yes)=\($a.noul)"
+    end'
+}
+
+call() {
+  local key="${TYPESAFE_API_KEY:-$(cat "$key_file" 2>/dev/null || true)}"
+  [[ -n "$key" ]] || key="$(pass show jev/personal 2>/dev/null | head -1 || true)"
+  [[ -n "$key" ]] || { echo "jev: no key — export TYPESAFE_API_KEY, write $key_file, or store one at `pass jev/personal`" >&2; exit 1; }
+  # Observed: sequential TLS handshakes to this host get reset ~10% of the time.
+  curl -sS --retry 4 --retry-all-errors --retry-delay 1 \
+    "$api" -H "Authorization: Bearer $key" -H "Content-Type: application/json" -d @-
+}
+
+case "${1:-}" in
+  --selftest)
+    fixture='{"answers":{"dept":{"type":"choice","choice":"billing","confidence":0.596,"probabilities":{"billing":0.84,"technical":0.159}},"frust":{"type":"score","score":1.035,"confidence":0.842,"probabilities":{"0":0.1,"1":0.7,"2":0.2}},"urgent":{"type":"noul","noul":0.93}}}'
+    got="$(<<<"$fixture" render)"
+    want='dept	billing	conf 0.596	billing=0.84  technical=0.159
+frust	1.035	conf 0.842	0=0.1  1=0.7  2=0.2
+urgent	p(yes)=0.93'
+    [[ "$got" == "$want" ]] || { printf 'FAIL\nwant:\n%s\ngot:\n%s\n' "$want" "$got"; exit 1; }
+    echo "selftest ok"
+    ;;
+  --raw)
+    jq -c '.model = (.model // "jev-latest")' | call
+    ;;
+  -n|--noul)
+    [[ $# -eq 3 ]] || { echo "usage: jev -n <instruction> <state>" >&2; exit 2; }
+    jq -nc --arg s "$3" --arg i "$2" \
+      '{model:"jev-latest",state:$s,questions:{q:{type:"noul",instructions:$i}}}' | call | render
+    ;;
+  "")
+    jq -c '.model = (.model // "jev-latest")' | call | render
+    ;;
+  *)
+    echo "usage: jev [--raw|-n|--selftest]  (see header)" >&2
+    exit 2
+    ;;
+esac
