@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Ring the pane's bell so tmux flags this window (prefix + a jumps to it).
+[[ -n "${TMUX_PANE:-}" ]] && printf '\a' > "$(tmux display -p -t "$TMUX_PANE" '#{pane_tty}')" 2>/dev/null || true
+
+state_file="${CODEX_SOUND_STATE_FILE:-$HOME/.codex/sound.txt}"
+[[ -f "$state_file" && "$(<"$state_file")" == "0" ]] && exit 0
+
+case "${1:-}" in
+    done)
+        sound="Glass"
+        ;;
+    help)
+        sound="Ping"
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+if [[ "$(uname -s)" == "Darwin" && -x /usr/bin/afplay ]]; then
+    /usr/bin/afplay "/System/Library/Sounds/${sound}.aiff" >/dev/null 2>&1 &
+fi

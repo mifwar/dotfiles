@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Show account reset countdowns from local Codex logs for tmux."""
+
+import json
+import math
+import os
+from pathlib import Path
+import tempfile
+import time
+
+
+def read_limits(home):
+    # Only read tails: session transcripts can be hundreds of megabytes.
+    paths = sorted(
+        (home / "sessions").rglob("*.jsonl"),
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    for path in paths[:8]:
+        with path.open("rb") as stream:
+            stream.seek(0, 2)
+            stream.seek(max(0, stream.tell() - 512 * 1024))
+            lines = stream.read().splitlines()
+        for line in reversed(lines):
+            if b'"rate_limits"' not in line:
+                continue
+            try:
+                limits = json.loads(line).get("payload", {}).get("rate_limits")
+            except (ValueError, AttributeError):
+                continue
+            if isinstance(limits, dict) and limits.get("limit_id") in (None, "codex"):
+                if limits.get("primary") or limits.get("secondary"):
+                    return limits
+    return {}
+
+
+def countdown(reset, now):
+    minutes = max(0, math.ceil((reset - now) / 60))
+    if not minutes:
+        return "now"
+    days, minutes = divmod(minutes, 1440)
+    hours, minutes = divmod(minutes, 60)
+    if days:
+        return f"{days}d{hours}h"
+    if hours:
+        return f"{hours}h{minutes}m"
+    return f"{minutes}m"
+
+
+def main():
+    home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
+    cache = home / "tmux-limits-cache.json"
+    now = time.time()
+    try:
+        data = json.loads(cache.read_text())
+    except (OSError, ValueError):
+        data = {}
+    if not 0 <= now - data.get("updated_at", 0) < 60:
+        data = {"updated_at": now, "limits": read_limits(home)}
+        # Atomic replacement also tolerates multiple tmux clients refreshing.
+        with tempfile.NamedTemporaryFile(mode="w", dir=home, delete=False) as stream:
+            json.dump(data, stream)
+        os.replace(stream.name, cache)
+    parts = []
+    for key, label in (("primary", "5h"), ("secondary", "weekly")):
+        window = data.get("limits", {}).get(key) or {}
+        reset = window.get("resets_at")
+        if isinstance(reset, (int, float)):
+            parts.append(f"{label} ↻{countdown(reset, now)}")
+    if parts:
+        print(" · ".join(parts), end="")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, TypeError, AttributeError):
+        # Missing/malformed local data should leave the status bar empty.
+        pass

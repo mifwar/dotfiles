@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+# tm — tmux grouped by project: one session per repo, one window per
+# checkout/worktree, one pane per task. Run it from anywhere in a project.
+#
+#   tm                 attach to (or switch to) the project's session,
+#                      creating the session/window for $PWD when missing
+#   tm --print         print "session:window" and exit (no tmux changes)
+#   tm --self-test     assert the name-resolution rules
+#
+# Session is the *main repo* name, so `git worktree` dirs land as windows in
+# their repo's session instead of spawning a session each. When worktree
+# metadata is missing (synced but not yet relinked), the .git file's gitdir
+# line still names the main repo.
+set -euo pipefail
+
+SESSION=""
+TOP=""
+WIN=""
+
+resolve() {
+  local dir=${1:-$PWD} d gd repo top
+
+  if gd=$(git -C "$dir" rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    repo=$(basename "$(dirname "$gd")")
+    top=$(git -C "$dir" rev-parse --show-toplevel)
+  else
+    # Unlinked worktree: walk up to the nearest .git (a file, usually).
+    d=$dir
+    while [[ $d != / && ! -e $d/.git ]]; do d=$(dirname "$d"); done
+    [[ -e $d/.git ]] || d=$dir
+    top=$d
+    if [[ -f $d/.git ]]; then
+      gd=$(sed -n 's/^gitdir: //p' "$d/.git")
+      case $gd in
+        */.git/worktrees/*) repo=$(basename "${gd%%/.git/worktrees/*}") ;;
+        *) repo=$(basename "$d") ;;
+      esac
+    else
+      repo=$(basename "$d")
+      if [[ $d == "$HOME" ]]; then repo=home; fi
+    fi
+  fi
+
+  SESSION=$repo
+  # tmux replaces '.' and ':' in session names with '_'.
+  SESSION=${SESSION//./_}
+  SESSION=${SESSION//:/_}
+  TOP=$top
+  WIN=$(basename "$top")
+  if [[ $top == "$HOME" ]]; then WIN=home; fi
+}
+
+self_test() {
+  local tmp=$1 got
+
+  git init -q "$tmp/main"
+  git -C "$tmp/main" -c user.name=Test -c user.email=test@example.com \
+    commit -q --no-verify --allow-empty -m init
+  git -C "$tmp/main" worktree add -q -b feat/x "$tmp/wt"
+
+  mkdir -p "$tmp/broken/sub" "$tmp/plain/sub"
+  printf 'gitdir: %s\n' "$tmp/main/.git/worktrees/broken" >"$tmp/broken/.git"
+
+  check() { # dir want_session want_window
+    resolve "$1"
+    got="$SESSION:$WIN"
+    if [[ $got == "$2:$3" ]]; then
+      printf 'ok   %s -> %s\n' "${1#"$tmp/"}" "$got"
+    else
+      printf 'FAIL %s -> %s (want %s:%s)\n' "${1#"$tmp/"}" "$got" "$2" "$3"
+      SELFTEST_FAILED=1
+    fi
+  }
+
+  check "$tmp/main" main main
+  check "$tmp/wt" main wt
+  check "$tmp/broken" main broken
+  check "$tmp/broken/sub" main broken
+  check "$tmp/plain" plain plain
+  check "$tmp/plain/sub" sub sub
+  mkdir -p "$tmp/home"
+  HOME="$tmp/home" check "$tmp/home" home home
+  mkdir -p "$tmp/a.b"
+  check "$tmp/a.b" a_b a.b
+}
+
+case ${1:-} in
+  --print)
+    resolve "$PWD"
+    printf '%s:%s\n' "$SESSION" "$WIN"
+    ;;
+  --self-test)
+    SELFTEST_FAILED=0
+    tmp=$(mktemp -d)
+    self_test "$tmp"
+    rm -rf "$tmp"
+    exit "$SELFTEST_FAILED"
+    ;;
+  "")
+    resolve "$PWD"
+    window=$WIN
+    if tmux has-session -t "=$SESSION" 2>/dev/null; then
+      tmux list-windows -t "=$SESSION" -F '#{window_name}' | grep -qxF "$window" ||
+        tmux new-window -t "=$SESSION:" -n "$window" -c "$TOP"
+      if [[ -n ${TMUX:-} ]]; then
+        tmux switch-client -t "=$SESSION"
+      else
+        tmux attach -t "=$SESSION"
+      fi
+    else
+      tmux new-session -d -s "$SESSION" -n "$window" -c "$TOP"
+      tmux attach -t "=$SESSION"
+    fi
+    ;;
+  *)
+    echo "usage: tm [--print|--self-test]" >&2
+    exit 2
+    ;;
+esac
