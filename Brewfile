@@ -1,12 +1,12 @@
 # Brewfile — declarative Homebrew dependencies for these dotfiles.
 # Install with: brew bundle --file ~/code/dotfiles/Brewfile
-tap "homebrew/cask"
+tap "asmvik/formulae"
 
 # CLI tools
 brew "neovim"
 brew "tmux"
-brew "yabai"
-brew "skhd"
+brew "asmvik/formulae/yabai"
+brew "asmvik/formulae/skhd"
 brew "starship"
 brew "cliclick"
 brew "jq"

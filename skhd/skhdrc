@@ -34,23 +34,23 @@ shift + alt - x : yabai -m space --mirror x-axis
 
 # toggle window float
 # grid: <rows>:<cols>:<start-x>:<start-y>:<width>:<height>
-shift + ctrl - t : yabai -m window --toggle float --grid 12:12:2:2:8:8
-shift + alt - t : yabai -m window --toggle float --grid 12:12:1:1:10:10
+shift + ctrl - t : $HOME/.local/bin/yabai-toggle-float 12:12:2:2:8:8
+shift + alt - t : $HOME/.local/bin/yabai-toggle-float 12:12:1:1:10:10
 
-# Small PiP window in bottom-right corner (always on top)
-shift + alt - p : yabai -m window --toggle float --grid 12:12:9:9:3:2 --layer above
+# Small floating window in bottom-right corner
+shift + alt - p : $HOME/.local/bin/yabai-toggle-float 12:12:9:9:3:2
 
-# Popup windows, floating + always on top (grid <rows>:<cols>:<x>:<y>:<w>:<h>)
+# Popup window presets (grid <rows>:<cols>:<x>:<y>:<w>:<h>)
 # corners/edges, PiP size
-shift + ctrl + cmd - u : yabai -m window --toggle float --grid 12:24:0:0:4:2 --layer above    # top-left
-shift + ctrl + cmd - i : yabai -m window --toggle float --grid 12:24:20:0:4:2 --layer above   # top-right
-shift + ctrl + cmd - j : yabai -m window --toggle float --grid 12:24:0:10:4:2 --layer above   # bottom-left
-shift + ctrl + cmd - k : yabai -m window --toggle float --grid 12:24:20:10:4:2 --layer above  # bottom-right
-shift + ctrl + cmd - n : yabai -m window --toggle float --grid 12:24:10:10:4:2 --layer above  # bottom-center
+shift + ctrl + cmd - u : $HOME/.local/bin/yabai-toggle-float 12:24:0:0:4:2    # top-left
+shift + ctrl + cmd - i : $HOME/.local/bin/yabai-toggle-float 12:24:20:0:4:2   # top-right
+shift + ctrl + cmd - j : $HOME/.local/bin/yabai-toggle-float 12:24:0:10:4:2   # bottom-left
+shift + ctrl + cmd - k : $HOME/.local/bin/yabai-toggle-float 12:24:20:10:4:2  # bottom-right
+shift + ctrl + cmd - n : $HOME/.local/bin/yabai-toggle-float 12:24:10:10:4:2  # bottom-center
 
 # sizes, bottom-right corner
-shift + ctrl - g : yabai -m window --toggle float --grid 12:24:19:10:4:2 --layer above   # ~PiP size, 16:9
-shift + alt - g : yabai -m window --toggle float --grid 12:24:21:10:2:2 --layer above   # tiny square
+shift + ctrl - g : $HOME/.local/bin/yabai-toggle-float 12:24:19:10:4:2  # ~PiP size, 16:9
+shift + alt - g : $HOME/.local/bin/yabai-toggle-float 12:24:21:10:2:2  # tiny square
 
 
 # move toggled window
@@ -145,14 +145,12 @@ alt - p : cliclick rc:.  #right click
 # cmd + shift + enter : cliclick rc:.
 #
 # DESKTOP
-#
-# Move current window to desktop 2
-ctrl + alt - 2 : yabai -m window --move desktop 2
+# Jump to a desktop
+alt - 1 : yabai -m space --focus 1
+alt - 2 : yabai -m space --focus 2
+alt - 3 : yabai -m space --focus 3
 
-# Move current window to desktop 3
-ctrl + alt - 3 : yabai -m window --move desktop 3
-# alt + shift - 3 : yabai -m window --move desktop 3
-#
-# # Switch to desktop
-# alt + 2 : yabai -m space --focus 2
-# alt + 3 : yabai -m space --focus 3
+# Move the focused window to a desktop and follow it
+ctrl + alt - 1 : yabai -m window --space 1 && yabai -m space --focus 1
+ctrl + alt - 2 : yabai -m window --space 2 && yabai -m space --focus 2
+ctrl + alt - 3 : yabai -m window --space 3 && yabai -m space --focus 3
